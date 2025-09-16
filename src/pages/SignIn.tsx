@@ -1,5 +1,5 @@
 import { Input } from "../components/Input";
-
+import { Button } from "../components/Button";
 export function SignIn() {
     return (
         <form className="w-full flex flex-col gap-4">
@@ -15,6 +15,7 @@ export function SignIn() {
                 type="password"
                 placeholder="123456"
             />
+            <Button isLoading>Entrar</Button>
         </form>
     );
 }
