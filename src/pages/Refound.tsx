@@ -10,7 +10,7 @@ import { Button } from "../components/Button";
 export function Refound() {
     const [category, setCategory] = useState("");
     const [name, setName] = useState("");
-    const [amount, setAmount] = useState(0);
+    const [amount, setAmount] = useState("");
     const [fileName, setFileName] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
@@ -54,12 +54,8 @@ export function Refound() {
                 <Input
                     required
                     legend="Valor gasto"
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    placeholder="R$ 0,00"
                     value={amount}
-                    onChange={(e) => setAmount(Number(e.target.value))}
+                    onChange={(e) => setAmount(e.target.value)}
                 />
             </div>
 

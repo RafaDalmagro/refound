@@ -12,8 +12,7 @@ export function Select({ legend, children, ...rest }: Props) {
             )}
             <select
                 className="w-full h-12 rounded-lg border border-gray-300 px-4 text-sm bg-transparent outline-none focus:border focus:border-green-100 placeholder:text-gray-300"
-                {...rest}
-                value="">
+                {...rest}>
                 <option disabled hidden value="">
                     Selecione
                 </option>
