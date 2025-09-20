@@ -6,6 +6,7 @@ import { Input } from "../components/Input";
 import { Select } from "../components/Select";
 import { Upload } from "../components/Upload";
 import { Button } from "../components/Button";
+import fileSvg from "../assets/file.svg";
 
 export function Refound() {
     const [category, setCategory] = useState("Teste");
@@ -70,13 +71,24 @@ export function Refound() {
                     disabled={!!params.id}
                 />
             </div>
+            {params.id ? (
+                <a
+                    href="https://rafadalmagro.com.br"
+                    target="_blank"
+                    className="text-sm text-green-100
+                font-semibold flex items-center justify-center gap-2 hover:opacity-70 transition ease-linear my-6">
+                    <img src={fileSvg} alt="Ícone de arquivo" />
+                    Abrir comprovante
+                </a>
+            ) : (
+                <Upload
+                    filename={fileName && fileName.name}
+                    onChange={(e) =>
+                        e.target.files && setFileName(e.target.files[0])
+                    }
+                />
+            )}
 
-            <Upload
-                filename={fileName && fileName.name}
-                onChange={(e) =>
-                    e.target.files && setFileName(e.target.files[0])
-                }
-            />
             <Button type="submit" isLoading={isLoading}>
                 {params.id ? "Voltar" : "Enviar"}
             </Button>
