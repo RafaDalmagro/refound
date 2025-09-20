@@ -1,9 +1,10 @@
 import { useActionState } from "react";
 import { z, ZodError } from "zod";
+import { api } from "../services/api";
+import { AxiosError } from "axios";
 
 import { Input } from "../components/Input";
 import { Button } from "../components/Button";
-import { ca } from "zod/locales";
 
 const signInSchema = z.object({
     email: z.email({ message: "Email inválido" }),
@@ -21,11 +22,21 @@ export function SignIn() {
                 email: String(formData.get("email")),
                 password: String(formData.get("password")),
             });
-            console.log(data);
+
+            const response = await api.post("/sessions", data);
+            console.log(response.data);
+
+            return { message: "Login realizado com sucesso!" };
         } catch (error) {
+            console.log(error);
+
             if (error instanceof ZodError) {
                 return { message: error.issues[0].message };
             }
+            if (error instanceof AxiosError) {
+                return { message: error.response?.data.message };
+            }
+
             return { message: "Erro ao fazer login. Tente novamente." };
         }
     }
