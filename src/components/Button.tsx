@@ -1,3 +1,4 @@
+import { is } from "zod/locales";
 import { classMerge } from "../utils/classMerge";
 
 type Props = React.ComponentProps<"button"> & {
@@ -28,6 +29,7 @@ export function Button({
             className={classMerge(
                 "flex items-center justify-center bg-green-100 rounded-lg text-white cursor-pointer hover:bg-green-200 transition ease-linear disabled:cursor-not-allowed disabled:opacity-50",
                 variants.button[variant],
+                isLoading && "cursor-progress",
                 className
             )}
             {...rest}>
