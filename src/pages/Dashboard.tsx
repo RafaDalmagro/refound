@@ -3,6 +3,7 @@ import { CATEGORIES } from "../utils/categories";
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
 import { RefundItem } from "../components/RefundItem";
+import type { RefundItemProps } from "../components/RefundItem";
 import { Pagination } from "../components/Pagination";
 import searchSvg from "../assets/search.svg";
 
@@ -21,6 +22,9 @@ export function Dashboard() {
     const [name, setName] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(10);
+    const [refounds, setRefounds] = useState<RefundItemProps[]>([
+        REFUND_EXAMPLE,
+    ]);
 
     function fetchRefounds(e: React.FormEvent) {
         e.preventDefault();
@@ -61,9 +65,17 @@ export function Dashboard() {
                     />
                 </Button>
             </form>
-            <div className="mt-6 flex flex-col gap-4 max-h-[342px] overflow-y-scroll">
-                <RefundItem data={REFUND_EXAMPLE} />
+
+            <div className="my-6 flex flex-col gap-4 max-h-[342px] overflow-y-scroll">
+                {refounds.map((item) => (
+                    <RefundItem
+                        key={item.id}
+                        data={item}
+                        href={`/refound/${item.id}`}
+                    />
+                ))}
             </div>
+
             <Pagination
                 currentPage={page}
                 totalPages={totalPages}

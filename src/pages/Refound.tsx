@@ -1,23 +1,29 @@
 import { CATEGORIES, CATEGORIES_KEYS } from "../utils/categories";
 
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { Input } from "../components/Input";
 import { Select } from "../components/Select";
 import { Upload } from "../components/Upload";
 import { Button } from "../components/Button";
 
 export function Refound() {
-    const [category, setCategory] = useState("");
-    const [name, setName] = useState("");
-    const [amount, setAmount] = useState("");
+    const [category, setCategory] = useState("Teste");
+    const [name, setName] = useState("33");
+    const [amount, setAmount] = useState("3");
     const [fileName, setFileName] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    const params = useParams<{ id: string }>();
 
     const navigate = useNavigate();
 
     function onSubmit(event: React.FormEvent) {
         event.preventDefault();
+
+        if (params.id) {
+            return navigate(-1);
+        }
 
         console.log({ name, category, amount, fileName });
         navigate("/confirm", { state: { fromSubmit: true } });
@@ -41,13 +47,15 @@ export function Refound() {
                 legend="Nome da solicitação"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
+                disabled={!!params.id}
             />
             <div className="flex gap-4">
                 <Select
                     required
                     legend="Categoria"
                     value={category}
-                    onChange={(e) => setCategory(e.target.value)}>
+                    onChange={(e) => setCategory(e.target.value)}
+                    disabled={!!params.id}>
                     {CATEGORIES_KEYS.map((category) => (
                         <option key={category} value={category}>
                             {CATEGORIES[category].name}
@@ -59,18 +67,18 @@ export function Refound() {
                     legend="Valor gasto"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
+                    disabled={!!params.id}
                 />
             </div>
 
             <Upload
                 filename={fileName && fileName.name}
-                required
                 onChange={(e) =>
                     e.target.files && setFileName(e.target.files[0])
                 }
             />
             <Button type="submit" isLoading={isLoading}>
-                Enviar
+                {params.id ? "Voltar" : "Enviar"}
             </Button>
         </form>
     );
