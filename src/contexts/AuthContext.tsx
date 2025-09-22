@@ -1,11 +1,12 @@
 import { createContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
+import { api } from "../services/api";
 
 type AuthContext = {
     isLoading: boolean;
     session: null | UserAPIResponse;
     save: (session: UserAPIResponse) => void;
-	remove: () => void;
+    remove: () => void;
 };
 
 const LOCAL_STORAGE_KEY = "@refound";
@@ -23,6 +24,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         );
         localStorage.setItem(`${LOCAL_STORAGE_KEY}:token`, data.token);
 
+        api.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
         setSession(data);
     }
 
@@ -31,6 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = localStorage.getItem(`${LOCAL_STORAGE_KEY}:token`);
 
         if (user && token) {
+            api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             setSession({ user: JSON.parse(user), token });
         }
 
@@ -42,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         localStorage.removeItem(`${LOCAL_STORAGE_KEY}:user`);
         localStorage.removeItem(`${LOCAL_STORAGE_KEY}:token`);
 
-		window.location.href = "/";
+        window.location.href = "/";
     }
 
     useEffect(() => {

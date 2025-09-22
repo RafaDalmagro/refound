@@ -1,4 +1,8 @@
 import { CATEGORIES, CATEGORIES_KEYS } from "../utils/categories";
+import { z, ZodError } from "zod";
+
+import { api } from "../services/api";
+import { AxiosError } from "axios";
 
 import { useState } from "react";
 import { useNavigate, useParams } from "react-router";
@@ -8,26 +12,70 @@ import { Upload } from "../components/Upload";
 import { Button } from "../components/Button";
 import fileSvg from "../assets/file.svg";
 
+const refundsSchema = z.object({
+    name: z
+        .string()
+        .min(3, { message: "O nome deve ter no mínimo 3 caracteres" }),
+    category: z.string().min(1, { message: "Selecione uma categoria" }),
+    amount: z.coerce
+        .number({ message: "Valor inválido" })
+        .positive({ message: "O valor deve ser positivo" }),
+});
+
 export function Refound() {
-    const [category, setCategory] = useState("Teste");
-    const [name, setName] = useState("33");
-    const [amount, setAmount] = useState("3");
-    const [fileName, setFileName] = useState<File | null>(null);
+    const [category, setCategory] = useState("");
+    const [name, setName] = useState("");
+    const [amount, setAmount] = useState("");
+    const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
     const params = useParams<{ id: string }>();
 
     const navigate = useNavigate();
 
-    function onSubmit(event: React.FormEvent) {
+    async function onSubmit(event: React.FormEvent) {
         event.preventDefault();
 
         if (params.id) {
             return navigate(-1);
         }
 
-        console.log({ name, category, amount, fileName });
-        navigate("/confirm", { state: { fromSubmit: true } });
+        try {
+            setIsLoading(true);
+
+            if (!file) {
+                return alert("Por favor, envie o comprovante da despesa");
+            }
+
+            const fileUploadForm = new FormData();
+            fileUploadForm.append("file", file);
+            
+            const response = await api.post("/uploads", fileUploadForm);
+
+
+            const data = refundsSchema.parse({
+                name,
+                category,
+                amount: amount.replace(",", "."),
+            });
+
+            await api.post("/refunds", {
+                ...data,
+                filename: response.data.filename,
+            });
+
+            navigate("/confirm", { state: { fromSubmit: true } });
+        } catch (error) {
+            if (error instanceof ZodError) {
+                return alert(error.issues[0].message);
+            }
+            if (error instanceof AxiosError) {
+                return alert(error.response?.data.message);
+            }
+            alert("Não foi possível enviar a solicitação");
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -82,9 +130,9 @@ export function Refound() {
                 </a>
             ) : (
                 <Upload
-                    filename={fileName && fileName.name}
+                    filename={file && file.name}
                     onChange={(e) =>
-                        e.target.files && setFileName(e.target.files[0])
+                        e.target.files && setFile(e.target.files[0])
                     }
                 />
             )}
