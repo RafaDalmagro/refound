@@ -12,15 +12,6 @@ import searchSvg from "../assets/search.svg";
 
 import { formatCurrency } from "../utils/formatCurrency";
 import { useState, useEffect } from "react";
-import { id } from "zod/locales";
-
-const REFUND_EXAMPLE = {
-    id: "1",
-    username: "João Pedro",
-    category: "Alimentação",
-    amount: formatCurrency(59.9),
-    categoryImg: CATEGORIES["transport"].icon,
-};
 
 const PER_PAGE = 5;
 
@@ -39,12 +30,14 @@ export function Dashboard() {
             setRefunds(
                 response.data.refunds.map((refund) => ({
                     id: refund.id,
-                    username: refund.username,
-                    category: refund.category,
+                    username: refund.user.name,
+                    description: refund.name,
                     amount: formatCurrency(refund.amount),
                     categoryImg: CATEGORIES[refund.category].icon,
                 }))
             );
+
+            setTotalPages(response.data.pagination.totalPages);
         } catch (error) {
             console.log(error);
             if (error instanceof AxiosError) {
@@ -55,9 +48,15 @@ export function Dashboard() {
         }
     }
 
+    function onSubmit(event: React.FormEvent) {
+        event.preventDefault();
+
+        fetchRefounds();
+    }
+
     useEffect(() => {
         fetchRefounds();
-    }, []);
+    }, [page]);
 
     function handlePagination(action: "next" | "previous") {
         setPage((prevPage) => {
@@ -78,7 +77,7 @@ export function Dashboard() {
                 Solicitações
             </h1>
             <form
-                onSubmit={fetchRefounds}
+                onSubmit={onSubmit}
                 className="flex items-center justify-center pb-6 border-b-[1px] border-b-gray-400 md:flex-row gap-3 mt-6">
                 <Input
                     placeholder="Pesquisar pelo nome"

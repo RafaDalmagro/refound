@@ -1,6 +1,6 @@
 type RefundAPIResponse ={
 	id: string;
-	username: string;
+	name: string;
 	category: CategoriesAPIEnum;
 	amount: number;
 	filename: string;
