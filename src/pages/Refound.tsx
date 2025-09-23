@@ -1,16 +1,17 @@
 import { CATEGORIES, CATEGORIES_KEYS } from "../utils/categories";
-import { z, ZodError } from "zod";
+import { set, z, ZodError } from "zod";
 
 import { api } from "../services/api";
 import { AxiosError } from "axios";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Input } from "../components/Input";
 import { Select } from "../components/Select";
 import { Upload } from "../components/Upload";
 import { Button } from "../components/Button";
 import fileSvg from "../assets/file.svg";
+import { formatCurrency } from "../utils/formatCurrency";
 
 const refundsSchema = z.object({
     name: z
@@ -28,9 +29,9 @@ export function Refound() {
     const [amount, setAmount] = useState("");
     const [file, setFile] = useState<File | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+    const [fileUrl, setFileUrl] = useState<string | null>(null);
 
     const params = useParams<{ id: string }>();
-
     const navigate = useNavigate();
 
     async function onSubmit(event: React.FormEvent) {
@@ -49,9 +50,8 @@ export function Refound() {
 
             const fileUploadForm = new FormData();
             fileUploadForm.append("file", file);
-            
-            const response = await api.post("/uploads", fileUploadForm);
 
+            const response = await api.post("/uploads", fileUploadForm);
 
             const data = refundsSchema.parse({
                 name,
@@ -77,6 +77,31 @@ export function Refound() {
             setIsLoading(false);
         }
     }
+
+    async function fetchRefund(id: string) {
+        try {
+            const { data } = await api.get<RefundAPIResponse>(`/refunds/${id}`);
+            setCategory(data.category);
+            setName(data.name);
+            setAmount(formatCurrency(data.amount));
+            setFileUrl(data.filename);
+
+            console.log(data);
+        } catch (error) {
+            console.log(error);
+
+            if (error instanceof AxiosError) {
+                return alert(error.response?.data.message);
+            }
+            return alert("Não foi possível carregar os dados da solicitação");
+        }
+    }
+
+    useEffect(() => {
+        if (params.id) {
+            fetchRefund(params.id);
+        }
+    }, [params.id]);
 
     return (
         <form
@@ -119,9 +144,9 @@ export function Refound() {
                     disabled={!!params.id}
                 />
             </div>
-            {params.id ? (
+            {params.id && fileUrl ? (
                 <a
-                    href="https://rafadalmagro.com.br"
+                    href={`http://localhost:3333/uploads/${fileUrl}`}
                     target="_blank"
                     className="text-sm text-green-100
                 font-semibold flex items-center justify-center gap-2 hover:opacity-70 transition ease-linear my-6">
