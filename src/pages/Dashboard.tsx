@@ -1,4 +1,7 @@
 import { CATEGORIES } from "../utils/categories";
+import { AxiosError } from "axios";
+
+import { api } from "../services/api";
 
 import { Button } from "../components/Button";
 import { Input } from "../components/Input";
@@ -8,7 +11,8 @@ import { Pagination } from "../components/Pagination";
 import searchSvg from "../assets/search.svg";
 
 import { formatCurrency } from "../utils/formatCurrency";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { id } from "zod/locales";
 
 const REFUND_EXAMPLE = {
     id: "1",
@@ -18,19 +22,42 @@ const REFUND_EXAMPLE = {
     categoryImg: CATEGORIES["transport"].icon,
 };
 
+const PER_PAGE = 5;
+
 export function Dashboard() {
     const [name, setName] = useState("");
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(10);
-    const [refounds, setRefounds] = useState<RefundItemProps[]>([
-        REFUND_EXAMPLE,
-    ]);
+    const [refounds, setRefunds] = useState<RefundItemProps[]>([]);
 
-    function fetchRefounds(e: React.FormEvent) {
-        e.preventDefault();
+    async function fetchRefounds() {
+        try {
+            const response = await api.get<RefundPaginantionAPIResponse>(
+                `/refunds?name=${name.trim()}&page=${page}&perPage=${PER_PAGE}`
+            );
 
-        console.log(name);
+            setRefunds(
+                response.data.refunds.map((refund) => ({
+                    id: refund.id,
+                    username: refund.username,
+                    category: refund.category,
+                    amount: formatCurrency(refund.amount),
+                    categoryImg: CATEGORIES[refund.category].icon,
+                }))
+            );
+        } catch (error) {
+            console.log(error);
+            if (error instanceof AxiosError) {
+                return alert(error.response?.data.message);
+            }
+
+            alert("Erro ao buscar reembolsos");
+        }
     }
+
+    useEffect(() => {
+        fetchRefounds();
+    }, []);
 
     function handlePagination(action: "next" | "previous") {
         setPage((prevPage) => {

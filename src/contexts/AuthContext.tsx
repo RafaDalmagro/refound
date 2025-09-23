@@ -1,5 +1,4 @@
 import { createContext, useEffect, useState } from "react";
-import { useNavigate } from "react-router";
 import { api } from "../services/api";
 
 type AuthContext = {
